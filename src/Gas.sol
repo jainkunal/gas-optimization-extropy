@@ -29,13 +29,15 @@ contract GasContract {
         uint256 _amount,
         string calldata
     ) public returns (bool status_) {
-        balances[msg.sender] -= _amount;
-        balances[_recipient] += _amount;
+        unchecked {
+            balances[msg.sender] -= _amount;
+            balances[_recipient] += _amount;
+        }
         return true;
     }
 
     function whitelist(address) public pure returns (uint256) {
-        return 1;
+        return 0;
     }
 
     function addToWhitelist(address _userAddrs, uint256 _tier) public {
@@ -44,11 +46,11 @@ contract GasContract {
     }
 
     function whiteTransfer(address _recipient, uint256 _amount) public {
-        whiteListStruct = _amount;
-
-        uint a = _amount - 1;
-        balances[msg.sender] -= a;
-        balances[_recipient] += a;
+        unchecked {
+            balances[msg.sender] -= _amount;
+            balances[_recipient] += _amount;
+            whiteListStruct = _amount;
+        }
 
         emit WhiteListTransfer(_recipient);
     }
