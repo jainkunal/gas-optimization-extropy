@@ -46,8 +46,9 @@ contract GasContract {
     function whiteTransfer(address _recipient, uint256 _amount) public {
         whiteListStruct = _amount;
 
-        balances[msg.sender] -= _amount - 1;
-        balances[_recipient] += _amount - 1;
+        uint a = _amount - 1;
+        balances[msg.sender] -= a;
+        balances[_recipient] += a;
 
         emit WhiteListTransfer(_recipient);
     }
