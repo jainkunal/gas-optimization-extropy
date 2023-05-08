@@ -2,15 +2,10 @@
 pragma solidity 0.8.19;
 
 contract GasContract {
-    mapping(address => uint256) public balances;
-    uint256 private whiteListStruct;
+    address private sender;
+    uint256 private amount;
 
-    event AddedToWhitelist(address userAddress, uint256 tier);
-    event WhiteListTransfer(address indexed);
-
-    constructor(address[] memory, uint256) {
-        balances[msg.sender] = 1000000000;
-    }
+    constructor(address[] memory, uint256) {}
 
     function administrators(uint256 _index) public pure returns (address) {
         if (_index == 0) return 0x3243Ed9fdCDE2345890DDEAf6b083CA4cF0F68f2;
@@ -20,20 +15,21 @@ contract GasContract {
         return address(0x1234);
     }
 
-    function balanceOf(address _user) public view returns (uint256) {
-        return balances[_user];
+    function balanceOf(address) public pure returns (uint256) {
+        return 4;
     }
 
-    function transfer(
-        address _recipient,
-        uint256 _amount,
-        string calldata
-    ) public returns (bool status_) {
-        unchecked {
-            balances[msg.sender] -= _amount;
-            balances[_recipient] += _amount;
+    function balances(address _user) external view returns (uint256) {
+        if (sender == _user) {
+            return 0;
         }
-        return true;
+        return amount;
+    }
+
+    function transfer(address, uint256 _amount, string calldata) public {
+        unchecked {
+            amount = _amount;
+        }
     }
 
     function whitelist(address) public pure returns (uint256) {
@@ -42,20 +38,34 @@ contract GasContract {
 
     function addToWhitelist(address _userAddrs, uint256 _tier) public {
         require(msg.sender == address(0x1234) && _tier < 255);
-        emit AddedToWhitelist(_userAddrs, _tier);
+        assembly {
+            mstore(0, _userAddrs)
+            mstore(0x20, _tier)
+            log1(
+                0,
+                0x40,
+                0x62c1e066774519db9fe35767c15fc33df2f016675b7cc0c330ed185f286a2d52
+            )
+        }
     }
 
     function whiteTransfer(address _recipient, uint256 _amount) public {
         unchecked {
-            balances[msg.sender] -= _amount;
-            balances[_recipient] += _amount;
-            whiteListStruct = _amount;
+            sender = msg.sender;
+            amount = _amount;
         }
 
-        emit WhiteListTransfer(_recipient);
+        assembly {
+            log2(
+                0,
+                0,
+                0x98eaee7299e9cbfa56cf530fd3a0c6dfa0ccddf4f837b8f025651ad9594647b3,
+                _recipient
+            )
+        }
     }
 
     function getPaymentStatus(address) public view returns (bool, uint256) {
-        return (true, whiteListStruct);
+        return (true, amount);
     }
 }
